@@ -1,0 +1,22 @@
+.s-container-vertical,.s-container-horizontal{
+    overflow: hidden;
+}
+
+.s-wrapper{
+    height:100%;
+    width:100%;
+    overflow:visible;
+    transition:transform 0.5s;
+    border:1px solid black;
+}
+
+.s-wrapper:after{
+    zoom:1;
+    clear:both;
+}
+
+.s-container-horizontal .s-wrapper{
+}
+
+.s-container-vertical .s-wrapper{
+}
