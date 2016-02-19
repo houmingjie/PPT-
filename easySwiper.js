@@ -26,6 +26,30 @@
             });
         }
 
+        function hasClass(elem,cls) {
+            cls = " " + cls + " ";
+            if (( " " + elem.className + " " ).replace( /[\t\r\n\f]/g, " " ).indexOf( cls ) > -1
+            ) {
+                return true;
+            }
+            return false;
+        }
+
+        function addClass(ele,cls){
+            cls = cls.match(/\S+/g) || [];
+            cls.forEach(function(clz){
+                if (!hasClass(ele,clz)) ele.className += " "+cls;
+            });
+        }
+
+        function removeClass(ele,cls) {
+            cls = cls.match(/\S+/g) || [];
+            cls.forEach(function(clz){
+                var reg = new RegExp('(\\s|^)'+clz+'(\\s|$)',"g");
+                ele.className=ele.className.replace(reg,' ');
+            });
+        }
+
         //默认配置
         var SwiperDefault = {
             pageClass:"s-page",//默认页面选择符
@@ -63,9 +87,8 @@
 
             this.container = container;
             var wrapper = container.querySelector("."+options.wrapperClass);
-            wrapper.className += " s-wrapper";
-
-            this.container.className += " s-container-"+ options.direction;
+            addClass( wrapper,"s-wrapper" );
+            addClass( this.container,"s-container-" + options.direction );
             var pages = [].slice.call(container.querySelectorAll(options.pageSelector));
             pages.forEach(function(page){
                 wrapper.appendChild(page);
@@ -81,25 +104,7 @@
             resize:function(){//根据容器尺寸设置item和wrapper尺寸
                 var isHorizontal = this.options.direction == "horizontal";
                 var itemCount = this.pages.length;
-                ////this.itemSize = isHorizontal?this.container.offsetWidth:this.container.offsetHeight;
-                ////this.wrapperSize = this.pages.length*this.itemSize;
-                ////console.info(this.wrapperSize);
-                //
-                //if(isHorizontal){
-                //    this.wrapper.style.width = this.wrapperSize +"px";
-                //    this.pages.forEach(function(e){
-                //        e.style.float = "left";
-                //        e.style.height = "100%";
-                //        e.style.width = this.itemSize+"px";
-                //    });
-                //}
-                //else{
-                //    this.wrapper.style.height = this.wrapperSize +"px";
-                //    this.pages.forEach(function(e){
-                //        e.style.width = "100%";
-                //        e.style.height = this.itemSize+"px";
-                //    });
-                //}
+
 
 
                 if(isHorizontal){//水平的
