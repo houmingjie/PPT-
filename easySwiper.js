@@ -68,6 +68,10 @@
         isHorizontal:true,//默认方向 水平
         threshold:50,//临界值,超过临界值触发翻页
         duration:"0.5s",//持续时间
+        supportWheel:true,//支持鼠标滚轮翻页
+        wheelThreshold:2,//鼠标滚动触发翻页次数
+        auto:true,//是否自动滚动
+        autoInterval:5000,//自动滚动时间间隔
     }
 
     function Swiper(target,options){
@@ -123,6 +127,7 @@
         this.pages = pages;
         this.pageCount = pages.length;
         this.index = 1;
+        this.autoTimer = null;
         this.resize();
         var resizeTimer = null;
         window.addEventListener("resize",function(){//窗体大小变化时节流改变wrapper和page的大小
@@ -136,6 +141,7 @@
         var startX;
         var startY;
 
+        //触摸或点击事件
         function moveStart(e){
             if(!self.canMove){
                 self.canMove = true;
@@ -162,6 +168,9 @@
                     self.moveDistance = isHorizontal?(e.touches[0].pageX - startX):(e.touches[0].pageY - startY);
                 }
                 self.wrapper.style.transform = "translate"+(isHorizontal?"X":"Y")+"("+(self.transFormDistance+self.moveDistance)+"px)";
+                //阻止默认行为，防止因为用户选择了字符后再拖动（浏览器默认搜索选中的字符）造成的位移混乱
+                e.preventDefault();
+                e.returnValue = false;
             }
         }
 
@@ -191,9 +200,39 @@
         dom.addEventListener("mouseup",moveEnd,false);
         dom.addEventListener("touchend",moveEnd,false);
 
+        var deltaScroll = 0;
+        //鼠标滚轮事件
+        function mouseWheel(e){
+            e.delta = (e.wheelDelta) ? e.wheelDelta / 120 : -(e.detail || 0) / 3;
+            e.preventDefault();
+            e.stopPropagation();
 
-        //setInterval(function(){self.goto(++self.index)},1000);
+            deltaScroll += e.delta;
+            if(Math.abs(deltaScroll)>=options.wheelThreshold){
+                self.goto(self.index+(deltaScroll>0?-1:1));
+                deltaScroll = 0;
 
+                if(options.auto){
+                    //重置自动滚动
+                    clearTimeout(self.autoTimer);
+                    autoMove();
+                }
+            }
+        }
+
+        //支持滚动
+        if(options.supportWheel){
+            container.addEventListener("mousewheel",mouseWheel,false);
+            container.addEventListener("DOMMouseScroll",mouseWheel,false);
+        }
+
+        function autoMove(){
+            self.autoTimer = setInterval(function(){self.goto(++self.index);},options.autoInterval);
+        }
+
+        if(options.auto){
+            autoMove();
+        }
 
     }
 
