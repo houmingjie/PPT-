@@ -1,5 +1,6 @@
 .s-container-vertical,.s-container-horizontal{
     overflow: hidden;
+    position:relative;
 }
 
 .s-wrapper{
@@ -19,4 +20,49 @@
 }
 
 .s-container-vertical .s-wrapper{
+}
+
+.s-pagination{
+    position:absolute;
+    text-align: center;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.s-pagination>span{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    margin:1px;
+    line-height:8px;
+    border-radius: 4px;
+    cursor:pointer;
+    background:#ccc;
+}
+
+.s-pagination>span.active{
+    background:#438bca;
+}
+
+.s-container-horizontal .s-pagination{
+    bottom:10px;
+    left:0;
+    height:10px;
+    width:100%;
+}
+
+.s-container-horizontal .s-pagination>span{
+    margin:0 5px;
+}
+
+
+.s-container-vertical .s-pagination{
+    right:10px;
+    width:10px;
+    top:50%;
+    transform: translateY(-50%);
+}
+
+.s-container-horizontal .s-pagination>span{
+    margin:5px 0;
 }

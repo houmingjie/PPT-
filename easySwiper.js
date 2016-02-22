@@ -48,11 +48,22 @@
     }
 
     function removeClass(ele,cls) {
+        var i,e;
         cls = cls.match(/\S+/g) || [];
-        cls.forEach(function(clz){
-            var reg = new RegExp('(\\s|^)'+clz+'(\\s|$)',"g");
-            ele.className=ele.className.replace(reg,' ');
-        });
+
+        if(!ele.forEach){
+            ele = [ele];//TODO
+            console.info(ele);
+        }
+        for(i=0;i<ele.length;i++){
+            e = ele[i];
+            if(e.nodeType === 1){
+                cls.forEach(function(clz){
+                    var reg = new RegExp('(\\s|^)'+clz+'(\\s|$)',"g");
+                    ele.className=ele.className.replace(reg,' ');
+                });
+            }
+        }
     }
 
     function getComputedStyle(elem){
@@ -62,25 +73,27 @@
 
     //默认配置
     var SwiperDefault = {
-        pageClass:      "s-page",          //默认页面类名
-        wrapperClass:   "s-wrapper",       //默认wrapper类名
-        pagination:     "false",           //默认不显示分页
-        isHorizontal:   true,              //默认方向 水平
-        threshold:      50,                //翻页临界值,超过临界值触发翻页
-        duration:       "0.5s",            //持续时间
-        supportWheel:   true,              //支持鼠标滚轮翻页
-        wheelThreshold: 2,                 //鼠标滚动触发翻页所需次数
-        auto:           false,              //是否自动滚动
-        autoInterval:   5000,              //自动滚动时间间隔
-        autoIncreasing: true,              //是否递增自动滚动
-        loop:           true,              //是否循环滚动
-        initPage:       1,                 //初始化页面
+        pageClass:         "s-page",      //默认页面类名
+        wrapperClass:      "s-wrapper",   //默认wrapper类名
+        pagination:        true,         //默认不显示分页
+        pageNum:           true,         //是否显示页码
+        isHorizontal:      true,          //默认方向 水平
+        threshold:         50,            //翻页临界值,超过临界值触发翻页
+        animationDuration: "0.5s",        //持续时间
+        supportWheel:      true,          //支持鼠标滚轮翻页
+        wheelThreshold:    2,             //鼠标滚动触发翻页所需次数
+        auto:              false,         //是否自动滚动
+        autoInterval:      5000,          //自动滚动时间间隔
+        autoIncreasing:    true,          //是否递增自动滚动,false则递减
+        loop:              true,          //是否循环滚动
+        initPage:          1,             //初始化页面
     }
 
     function Swiper(target,options){
         var container,
             wrapper,
-            pages;
+            pages,
+            pager;//分页按钮
 
         var self = this;
 
@@ -122,7 +135,7 @@
 
         wrapper = container.querySelector("."+options.wrapperClass);
         wrapper.style.transitionProperty = "transform";
-        wrapper.style.transitionDuration = this.options.duration;
+        wrapper.style.transitionDuration = this.options.animationDuration;
         pages = [].slice.call(wrapper.querySelectorAll("."+options.pageClass));
 
         var firstPage,lastPage;
@@ -184,13 +197,12 @@
                     self.moveDistance = isHorizontal?(e.touches[0].pageX - startX):(e.touches[0].pageY - startY);
                 }
 
-                if(self.options.loop){//循环
-                    if(self.pageIndex == 0){
-                        self.goto(self.pageCount-2,true);
-                    }
-                    else if(self.pageIndex == (self.pageCount-1)){
-                        self.goto(1,true);
-                    }
+                //处理循环模式到达两边重复页的情况
+                if(self.pageIndex == 0){//在最前的最后一页
+                    self.goto(self.pageCount-2,true);
+                }
+                else if(self.pageIndex == (self.pageCount-1)){//在最后的第一页
+                    self.goto(1,true);
                 }
 
                 self.wrapper.style.transform = "translate"+(isHorizontal?"X":"Y")+"("+(self.transFormDistance+self.moveDistance)+"px)";
@@ -258,6 +270,7 @@
             container.addEventListener("DOMMouseScroll",mouseWheel,false);
         }
 
+        //自动播放
         function autoMove(){
             self.autoTimer = setInterval(function(){self.goto(self.options.autoIncreasing?(++self.pageIndex):(--self.pageIndex));},options.autoInterval);
         }
@@ -266,6 +279,20 @@
             autoMove();
         }
 
+        var paginationHTML="";
+        var truePageCount,i;
+        //分页
+        if(options.pagination){
+            truePageCount = this.options.loop?this.pageCount-2:this.pageCount;
+            for(i=0;i<truePageCount;i++){
+                paginationHTML +="<span>"+"</span>"
+            }
+            var pageElem = document.createElement("div");
+            addClass(pageElem,"s-pagination");
+            pageElem.innerHTML = paginationHTML;
+            this.pager = [].slice.call(pageElem.querySelectorAll("span"));
+            this.container.insertBefore(pageElem,null);
+        }
     }
 
     Swiper.prototype = {
@@ -292,10 +319,10 @@
                 });
             }
             this.pageSize = size;
-            this.goto(this.pageIndex,true);
+            this.goto(this.pageIndex,true);//修正变动大小后的页面位置
         },
         goto:function(pageIndex,withOutAnimate){
-            var trueIndex = 2;//真实目标页面索引
+            var trueIndex;//真实目标页面索引,比如循环时，在收尾添加重复的页面，第一页索引为2
             var isHorizontal = this.options.isHorizontal;
             var pageCount = this.pageCount;
             trueIndex = pageIndex+1;
@@ -318,7 +345,7 @@
                 this.wrapper.style.transitionDuration = "0s";
             }
             else{
-                this.wrapper.style.transitionDuration = this.options.duration;
+                this.wrapper.style.transitionDuration = this.options.animationDuration;
             }
 
             if(isHorizontal){
@@ -327,11 +354,29 @@
             else{
                 this.wrapper.style.transform = "translateY("+distance+"px)"
             }
-            var offsetHeight = this.wrapper.offsetHeight;//在这调用强制重绘
+            this.wrapper.offsetHeight;//强制触发重绘
             this.pageIndex = trueIndex-1;
+
+            var paginationIndex;
+            //分页器
+            if(this.options.pagination){
+                paginationIndex = this.pageIndex;
+
+                //处理循环模式重复页的情况
+                if(paginationIndex == 0){
+                    paginationIndex = this.pageCount-2;
+                }
+                else if(paginationIndex == (self.pageCount-1)){
+                    paginationIndex = 1;
+                }
+
+                //根据paginationIndex
+                removeClass(this.pager,"active");
+                addClass(this.pager[paginationIndex],"active");
+            }
+
             this.transFormDistance = distance;
         },
-
     }
 
     if ( typeof module === "object" && typeof module.exports === "object" ){

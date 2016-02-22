@@ -26,7 +26,7 @@
 			height:50%;
 			margin:0 auto;
 			box-sizing: border-box;
-			background:red;
+			/*background:red;*/
 		}
 
 		#main{
@@ -35,8 +35,9 @@
 		}
 
 		.page{
-			background:darkkhaki;
-            border:2px solid blue;
+			text-align: center;
+            /*vertical-align: center;*/
+            /*line-height:2;*/
 		}
 	</style>
 <script type="text/javascript" src="easySwiper.js"></script>
@@ -46,7 +47,9 @@
 		var swiper = new Swiper(pages,{
 			pageClass:"page",
 			wrapperClass:"banner-wrapper",
-			isHorizontal:true,
+			isHorizontal:false,
+            auto:true,
+//            animationDuration:"0.1s",
 		});
 
 		console.info(swiper);
