@@ -145,8 +145,8 @@
                     startY = e.pageY;
                 }
                 else if(e.type == "touchstart"){
-                    startX = e.originalEvent.touches[0].pageX;
-                    startY = e.originalEvent.touches[0].pageY;
+                    startX = e.touches[0].pageX;
+                    startY = e.touches[0].pageY;
                 }
             }
         }
@@ -159,7 +159,7 @@
                     self.moveDistance = isHorizontal?(e.pageX - startX):(e.pageY - startY);
                 }
                 else if(e.type == "touchmove"){
-                    self.moveDistance = isHorizontal?(e.originalEvent.touches[0].pageX - startX):(e.originalEvent.touches[0].pageY - startY);
+                    self.moveDistance = isHorizontal?(e.touches[0].pageX - startX):(e.touches[0].pageY - startY);
                 }
                 self.wrapper.style.transform = "translate"+(isHorizontal?"X":"Y")+"("+(self.transFormDistance+self.moveDistance)+"px)";
             }
