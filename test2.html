@@ -17,21 +17,12 @@
 		var swiper = new Swiper(pages,{
 			pageClass:"page",
 			wrapperClass:"banner-wrapper",
+			isHorizontal:true,
 		});
 
-
-		console.info(new Option(a.className).innerHTML);
+		console.info(swiper);
+//		console.info(new Option(a.className).innerHTML);
 	}
-
-
-
-
-
-	var testElement = document.querySelector("#test")
-	console.info(testElement);
-
-
-
 </script>
 <style>
 	html,body{
@@ -39,11 +30,21 @@
 		height:100%;
 	}
 	.test{
-		width:80%;
-		height:300px;
+		width:50%;
+		height:50%;
 		margin:0 auto;
+		box-sizing: border-box;
+		background:red;
 	}
 
+	#main{
+		height:100%;
+		width:100%;
+	}
+
+	.page{
+		background:darkkhaki;
+	}
 
 </style>
 </head>
@@ -54,8 +55,7 @@
 
 	<main id="main">
 		<div class="test">
-			<div id="a" class="banner-wrapper
-			   test">
+			<div id="a" class="banner-wrapper">
 				<section class="page">1</section>
 				<section class="page">2</section>
 				<section class="page">3</section>
@@ -65,9 +65,9 @@
 		</div>
 	</main>
 
-<div id="test"  class="test1 test2 test1
-test3
- test4"></div>
+<!--<div id="test"  class="test1 test2 test1-->
+<!--test3-->
+ <!--test4"></div>-->
 
 </body>
 </html>

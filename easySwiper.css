@@ -6,13 +6,13 @@
     height:100%;
     width:100%;
     overflow:visible;
-    transition:transform 0.5s;
-    border:1px solid black;
 }
 
-.s-wrapper:after{
+.s-wrapper::after{
     zoom:1;
     clear:both;
+    display:block;
+    content:"";
 }
 
 .s-container-horizontal .s-wrapper{
