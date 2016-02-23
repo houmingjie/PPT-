@@ -27,15 +27,15 @@
     text-align: center;
     z-index: 10;
     overflow: hidden;
+    font-size:0;
 }
 
 .s-pagination>span{
     display:inline-block;
     width:8px;
     height:8px;
-    margin:1px;
     line-height:8px;
-    border-radius: 4px;
+    border-radius:4px;
     cursor:pointer;
     background:#ccc;
 }
@@ -47,7 +47,7 @@
 .s-container-horizontal .s-pagination{
     bottom:10px;
     left:0;
-    height:10px;
+    height:8px;
     width:100%;
 }
 
@@ -58,11 +58,11 @@
 
 .s-container-vertical .s-pagination{
     right:10px;
-    width:10px;
+    width:8px;
     top:50%;
     transform: translateY(-50%);
 }
 
-.s-container-horizontal .s-pagination>span{
+.s-container-vertical .s-pagination>span{
     margin:5px 0;
 }

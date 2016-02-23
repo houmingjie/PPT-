@@ -34,34 +34,36 @@
     }
 
     function addClass(ele,cls){
+        var i, e, j, c;
         cls = cls.match(/\S+/g) || [];
-        if(!ele.forEach){
+        if(!Array.isArray(ele)){
             ele = [ele];
-        }
-        ele.forEach(function(e){
-            if(e.nodeType === 1){
-                cls.forEach(function(clz){
-                    if (!hasClass(e,clz)) e.className += " "+cls;
-                });
-            }
-        });
-    }
-
-    function removeClass(ele,cls) {
-        var i,e;
-        cls = cls.match(/\S+/g) || [];
-
-        if(!ele.forEach){
-            ele = [ele];//TODO
-            console.info(ele);
         }
         for(i=0;i<ele.length;i++){
             e = ele[i];
             if(e.nodeType === 1){
-                cls.forEach(function(clz){
-                    var reg = new RegExp('(\\s|^)'+clz+'(\\s|$)',"g");
-                    ele.className=ele.className.replace(reg,' ');
-                });
+                for(j=0;j<cls.length;j++){
+                    c = cls[j];
+                    if (!hasClass(e,c)) e.className += " "+c;
+                }
+            }
+        }
+    }
+
+    function removeClass(ele,cls) {
+        var i, e, j, c;
+        cls = cls.match(/\S+/g) || [];
+        if(!Array.isArray(ele)){
+            ele = [ele];
+        }
+        for(i=0;i<ele.length;i++){
+            e = ele[i];
+            if(e.nodeType === 1){
+                for(j=0;j<cls.length;j++){
+                    c = cls[j];
+                    var reg = new RegExp('(\\s|^)'+c+'(\\s|$)',"g");
+                    e.className=e.className.replace(reg,' ');
+                }
             }
         }
     }
@@ -76,7 +78,6 @@
         pageClass:         "s-page",      //默认页面类名
         wrapperClass:      "s-wrapper",   //默认wrapper类名
         pagination:        true,         //默认不显示分页
-        pageNum:           true,         //是否显示页码
         isHorizontal:      true,          //默认方向 水平
         threshold:         50,            //翻页临界值,超过临界值触发翻页
         animationDuration: "0.5s",        //持续时间
@@ -100,7 +101,7 @@
         this.canMove =false;
         this.moveDistance = 0;
         this.pageSize;//每一页的宽度或者高度,取决于移动方向
-        this.pageIndex = 1;//页面索引
+        this.pageIndex = 1;//真实页面索引,循环模式时0和pageCount-1为两个重复页面（对应最后一页和第一页）;
         this.autoTimer = null;
 
 
@@ -157,7 +158,6 @@
         this.pages = pages;
         this.pageCount = pages.length;//页面总数，如果支持循环则包括在首尾添加的重复页面
 
-        this.resize();
         var resizeTimer = null;
         window.addEventListener("resize",function(){//窗体大小变化时节流改变wrapper和page的大小
             clearTimeout(resizeTimer);
@@ -272,7 +272,11 @@
 
         //自动播放
         function autoMove(){
-            self.autoTimer = setInterval(function(){self.goto(self.options.autoIncreasing?(++self.pageIndex):(--self.pageIndex));},options.autoInterval);
+            self.autoTimer = setInterval(
+                function(){
+                    self.goto(self.options.autoIncreasing?(++self.pageIndex):(--self.pageIndex));
+                }
+                ,options.autoInterval);
         }
 
         if(options.auto){
@@ -285,14 +289,37 @@
         if(options.pagination){
             truePageCount = this.options.loop?this.pageCount-2:this.pageCount;
             for(i=0;i<truePageCount;i++){
-                paginationHTML +="<span>"+"</span>"
+                paginationHTML +="<span></span>"
             }
             var pageElem = document.createElement("div");
             addClass(pageElem,"s-pagination");
             pageElem.innerHTML = paginationHTML;
             this.pager = [].slice.call(pageElem.querySelectorAll("span"));
             this.container.insertBefore(pageElem,null);
+            pageElem.addEventListener("click",function(e){
+                var target = e.target;
+                var index = self.pager.indexOf(e.target);
+                if(target&&index>=0){
+                    if(options.auto){
+                        //重置自动滚动
+                        clearTimeout(self.autoTimer);
+                        autoMove();
+                    }
+
+                    //处理循环模式到达两边重复页的情况
+                    if(self.pageIndex == 0){//在最前的最后一页
+                        self.goto(self.pageCount-2,true);
+                    }
+                    else if(self.pageIndex == (self.pageCount-1)){//在最后的第一页
+                        self.goto(1,true);
+                    }
+
+                    self.goto(index+1);
+                }
+            },false);
         }
+        //修正大小
+        this.resize();
     }
 
     Swiper.prototype = {
@@ -326,19 +353,24 @@
             var isHorizontal = this.options.isHorizontal;
             var pageCount = this.pageCount;
             trueIndex = pageIndex+1;
-            if(this.options.loop){//循环的情况
-                if(trueIndex == 0){
-                    this.goto(this.pageCount-2,true);
-                    trueIndex = this.pageIndex;
+            if(this.options.loop){//自动播放且循环的情况
+                if(trueIndex == 0){//逆向经过首位的重复页
+                    this.goto(pageCount-2,true);
+                    this.goto(pageCount-3);
+                    return;
+                    //trueIndex = this.pageIndex;
                 }
-                else if(trueIndex == (this.pageCount+1)){
+                else if(trueIndex == (pageCount+1)){//正向经过末位的重复页
                     this.goto(1,true);
-                    trueIndex = this.pageIndex;
+                    this.goto(2);
+                    return;
+                    //trueIndex = this.pageIndex+2;
                 }
             }
             else{//非循环的情况
                 trueIndex = trueIndex>0?(trueIndex>pageCount?pageCount:trueIndex):1;
             }
+
             var distance = -(trueIndex-1)*this.pageSize;
 
             if(withOutAnimate){
@@ -354,7 +386,7 @@
             else{
                 this.wrapper.style.transform = "translateY("+distance+"px)"
             }
-            this.wrapper.offsetHeight;//强制触发重绘
+            var reDraw = this.wrapper.offsetHeight;//强制触发重绘
             this.pageIndex = trueIndex-1;
 
             var paginationIndex;
@@ -366,13 +398,13 @@
                 if(paginationIndex == 0){
                     paginationIndex = this.pageCount-2;
                 }
-                else if(paginationIndex == (self.pageCount-1)){
+                else if(paginationIndex == (this.pageCount-1)){
                     paginationIndex = 1;
                 }
 
-                //根据paginationIndex
+                //根据paginationIndex添加active类
                 removeClass(this.pager,"active");
-                addClass(this.pager[paginationIndex],"active");
+                addClass(this.pager[paginationIndex-1],"active");
             }
 
             this.transFormDistance = distance;
