@@ -27,7 +27,7 @@
 
     function hasClass(elem,cls) {
         cls = " " + cls + " ";
-        if (( " " + elem.className + " " ).replace( /[\t\r\n\f]/g, " " ).indexOf( cls ) > -1 ) {
+        if(( " " + elem.className + " " ).replace( /[\t\r\n\f]/g, " " ).indexOf( cls ) > -1 ) {
             return true;
         }
         return false;
@@ -67,11 +67,6 @@
             }
         }
     }
-
-    function getComputedStyle(elem){
-        return elem.currentStyle?elem.currentStyle : window.getComputedStyle(elem,null);
-    }
-
 
     //默认配置
     var SwiperDefault = {
@@ -183,6 +178,8 @@
                     startX = e.touches[0].pageX;
                     startY = e.touches[0].pageY;
                 }
+                e.preventDefault();
+                e.stopPropagation();
             }
         }
 
@@ -206,9 +203,10 @@
                 }
 
                 self.wrapper.style.transform = "translate"+(isHorizontal?"X":"Y")+"("+(self.transFormDistance+self.moveDistance)+"px)";
-                //阻止默认行为，防止因为用户选择了字符后再拖动（浏览器默认搜索选中的字符）造成的位移混乱
+                //阻止默认行为和传播，防止因为用户选择了字符后再拖动（浏览器默认搜索选中的字符）造成的位移混乱
                 e.preventDefault();
-                e.returnValue = false;
+                e.stopPropagation();
+                //e.cancelBubble = true;
             }
         }
 
