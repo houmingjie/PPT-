@@ -40,24 +40,48 @@
             /*vertical-align: center;*/
             /*line-height:2;*/
         }
+
+
+        .a{
+            background:#438bca;
+            width:170px;
+            float:left;
+            height:50px;
+        }
+
+        .b{
+            background:chartreuse;
+            height:60px;
+
+            margin:0 250px 0 170px;
+        }
+
+        .c{
+            background:#ccc;
+            width:250px;
+            height:70px;
+            float:right;
+
+        }
+
     </style>
     <script type="text/javascript" src="easySwiper.js"></script>
     <script type="text/javascript">
-        window.onload = function () {
-            var pages = document.querySelectorAll(".test");
-            var swiper = new Swiper(pages, {
-                pageClass: "page",
-                wrapperClass: "banner-wrapper",
+       window.onload = function () {
+           var pages = document.querySelectorAll(".test");
+           var swiper = new Swiper(pages, {
+               pageClass: "page",
+               wrapperClass: "banner-wrapper",
 //                isHorizontal: false,
-                auto: true,
-                initPage:5,
+               auto: true,
+               initPage:5,
 //                autoIncreasing:false,
 //            animationDuration:"0.1s",
-            });
+           });
 
-            console.info(swiper);
+           console.info(swiper);
 //		console.info(new Option(a.className).innerHTML);
-        }
+       }
     </script>
 </head>
 <body>
@@ -69,7 +93,7 @@
     <div class="test">
         <div id="a" class="banner-wrapper">
             <section class="page">1</section>
-            <section class="page">2</section>
+            <<section class="page">2</section>
             <section class="page">3</section>
             <section class="page">4</section>
             <section class="page">5</section>
@@ -77,9 +101,6 @@
     </div>
 </main>
 
-<!--<div id="test"  class="test1 test2 test1-->
-<!--test3-->
-<!--test4"></div>-->
 
 </body>
 </html>
